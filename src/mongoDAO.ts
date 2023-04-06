@@ -14,6 +14,7 @@ export class MongoDAO {
     private User;
 
     constructor() {
+        this.connectToDB();
         const userSchema = new Schema<IUser>({
             name: {type: String, required: true},
             surname: {type: String, required: true},
@@ -52,7 +53,6 @@ export class MongoWriteResponse {
 
 const test = async () => {
     const dao: MongoDAO = new MongoDAO();
-    dao.connectToDB();
     const id = dao.write({"name": "Max", "surname": "Ivanyshen", "age": 17})._id;
     const foundUser = await dao.findOne({_id: id});
     console.log("found user: " + foundUser);
