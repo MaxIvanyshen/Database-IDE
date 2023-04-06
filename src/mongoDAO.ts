@@ -9,7 +9,7 @@ export class MongoDAO {
     public static readonly ERROR = 1;
 
     public static connectToDB(): number {
-        const client: mongoDB.MongoClient = new mongoDB.MongoClient(mongo_data.DB_CONN_STRING.replace("<password>", mongo_data.password));
+        const client: mongoDB.MongoClient = new mongoDB.MongoClient(mongo_data.DB_CONN_STRING.replace("<db_name>", mongo_data.DB_NAME).replace("<password>", mongo_data.password));
        
         try {
              client.connect();
@@ -45,6 +45,7 @@ export class MongoDAO {
 }
 
 const printResponse = () => {
+    MongoDAO.write({"name": "Max", "surname": "Ivanyshen", "age": 16});
     MongoDAO.findOne({"name": "Max"}).then(res => console.log(res));
 }
 
