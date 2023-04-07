@@ -14,6 +14,7 @@ export class MongoDAO {
     private User;
 
     constructor() {
+        this.connectToDB();
         const userSchema = new Schema<IUser>({
             name: {type: String, required: true},
             surname: {type: String, required: true},
