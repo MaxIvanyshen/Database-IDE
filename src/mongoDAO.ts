@@ -1,26 +1,19 @@
 import * as mongo_data from './db_data/mongo_data.json';
 import mongoose, { Schema, model, connect, Model, connection } from 'mongoose';
 
-interface IUser {
-    name: string,
-    surname: string,
-    age: number
+interface UserObject {
 };
 
 export class MongoDAO {
     public readonly OK = 0;
     public readonly ERROR = 1;
 
-    private User;
+    private UserCollection;
 
-    constructor() {
+    constructor(schema: object) {
         this.connectToDB();
-        const userSchema = new Schema<IUser>({
-            name: {type: String, required: true},
-            surname: {type: String, required: true},
-            age: {type: Number, required: true}
-        })
-        this.User = model<IUser>('users', userSchema, mongo_data.DB_COLLECTION);    
+        const userSchema = new Schema<UserObject>(schema)
+        this.UserCollection = model<UserObject>('data', userSchema, mongo_data.DB_COLLECTION);    
     }
 
     public async connectToDB(): Promise<number> {
@@ -29,19 +22,19 @@ export class MongoDAO {
         return this.OK;
     }    
 
-    public async write(data: IUser): Promise<MongoWriteResponse> {
-        const user = new this.User(data); 
-        await user.save().catch(err => {console.log(err)}).then(() => console.log("saved!"));
-        return new MongoWriteResponse(user._id, this.OK);
+    public async write(data: UserObject): Promise<MongoWriteResponse> {
+        const obj = new this.UserCollection(data); 
+        await obj.save().catch(err => {console.log(err)}).then(() => console.log("saved!"));
+        return new MongoWriteResponse((obj as mongoose.Document)._id, this.OK);
     }
 
     public async findOne(query: object): Promise<any> {
-        const user = await this.User.findOne(query).exec();
+        const user = await this.UserCollection.findOne(query).exec();
         return user;
     }
 
     public async findMany(query: any): Promise<any> {
-        const users = await this.User.find().where(query).exec();
+        const users = await this.UserCollection.find().where(query).exec();
         return users;
     }
 }
@@ -56,11 +49,14 @@ export class MongoWriteResponse {
     }
 }
 
-const test = async() => {
-    const dao: MongoDAO = new MongoDAO();
-    console.log(await dao.connectToDB());
-    const foundUser = await dao.findMany({age: 17});
-    console.log(foundUser);
-}
+// const test = async() => {
+//     const schema = {
+//             name: {type: String, required: true},
+//             occupation: {type: String, required: true}
+//     }
+//     const dao: MongoDAO = new MongoDAO(schema);
+//     console.log(await dao.connectToDB());
+//     console.log(await dao.write({name: "Max Ivanyshen", occupation: "Student"}));
+// }
 
-test();
+// test();
