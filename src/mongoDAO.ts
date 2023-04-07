@@ -1,52 +1,65 @@
 import * as mongo_data from './db_data/mongo_data.json';
-import * as mongoDB from 'mongodb';
+import mongoose, { Schema, model, connect, Model, connection } from 'mongoose';
 
-
-export const collections: { data?: mongoDB.Collection } = {}
+interface IUser {
+    name: string,
+    surname: string,
+    age: number
+};
 
 export class MongoDAO {
-    public static readonly OK = 0;
-    public static readonly ERROR = 1;
+    public readonly OK = 0;
+    public readonly ERROR = 1;
 
-    public static connectToDB(): number {
-        const client: mongoDB.MongoClient = new mongoDB.MongoClient(mongo_data.DB_CONN_STRING.replace("<db_name>", mongo_data.DB_NAME).replace("<password>", mongo_data.password));
-       
-        try {
-             client.connect();
-        } catch(err) {
-            return this.ERROR;
-        }
-    
-        const db: mongoDB.Db = client.db(mongo_data.DB_NAME);
-        const collection = db.collection(mongo_data.DB_COLLECTION);
-    
-        collections.data = collection;
+    private User;
 
-        console.log("Successfully connected!");
-        return this.OK;
-    }  
-    
-    public static write(data: any): number {
-
-        try {
-            collections.data?.insertOne(data);
-        } catch (err) {
-            return this.ERROR;
-        }
-
-        return this.OK;
-
+    constructor() {
+        const userSchema = new Schema<IUser>({
+            name: {type: String, required: true},
+            surname: {type: String, required: true},
+            age: {type: Number, required: true}
+        })
+        this.User = model<IUser>('users', userSchema, mongo_data.DB_COLLECTION);    
     }
 
-    public static async findOne(query: any): Promise<any> {
-        const foundData = collections.data?.findOne(query).then((res) => res?.json()).then(data => {return data});
-        return foundData;
+    public async connectToDB(): Promise<number> {
+        connect(mongo_data.DB_CONN_STRING.replace("<db_name>", mongo_data.DB_NAME).replace("<password>", mongo_data.password))
+            .catch(err => {console.log(err)});
+        return this.OK;
+    }    
+
+    public async write(data: IUser): Promise<MongoWriteResponse> {
+        const user = new this.User(data); 
+        await user.save().catch(err => {console.log(err)}).then(() => console.log("saved!"));
+        return new MongoWriteResponse(user._id, this.OK);
+    }
+
+    public async findOne(query: object): Promise<any> {
+        const user = await this.User.findOne(query).exec();
+        return user;
+    }
+
+    public async findMany(query: any): Promise<any> {
+        const users = await this.User.find().where(query).exec();
+        return users;
     }
 }
 
-const printResponse = () => {
-    MongoDAO.write({"name": "Max", "surname": "Ivanyshen", "age": 16});
-    MongoDAO.findOne({"name": "Max"}).then(res => console.log(res));
+export class MongoWriteResponse {
+    public _id: mongoose.Types.ObjectId;
+    public status: number;
+
+    constructor(id: mongoose.Types.ObjectId, status: number) {
+        this._id = id;
+        this.status = status;
+    }
 }
 
-printResponse(); 
+const test = async() => {
+    const dao: MongoDAO = new MongoDAO();
+    console.log(await dao.connectToDB());
+    const foundUser = await dao.findMany({age: 17});
+    console.log(foundUser);
+}
+
+test();
