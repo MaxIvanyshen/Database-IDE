@@ -5,8 +5,9 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "npx rimraf ./dist && npx tsc",
+    "start": "npx ts-node ./src/server.ts",
     "predev": "npm run build",
-    "dev": "npx concurrently \"npx tsc\" \"nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' ./src/server.ts\""
+    "dev": "npx concurrently \"npx tsc\" \"nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/server.ts\""
   },
   "keywords": [],
   "author": "",

@@ -1,12 +1,12 @@
 import express, {Express, Request, Response} from 'express';
-import { Controller } from './controller';
-import { MongoController } from './mongoController';
+import { DbController } from './db_controllers/controller';
+import { MongoController } from './db_controllers/mongoController';
 
 export class Server {
     private app: Express;
     private PORT = 8000;
 
-    private mongoController: Controller;
+    private mongoController: DbController;
 
     constructor() {
         this.app = express();
@@ -15,13 +15,13 @@ export class Server {
     }
 
     private config(): void {
+        this.app.use(express.json());
         this.mongoController.config(this.app);
-
     }
 
     public start(): void {
         this.app.listen(this.PORT, () => {
-            console.log("listening on port " + this.PORT);
+            console.log(`listening on port ${this.PORT}`);
         });
     }
 }

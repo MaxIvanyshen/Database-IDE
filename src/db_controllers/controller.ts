@@ -1,6 +1,5 @@
 import {Express, Request, Response} from 'express';
 
-export interface Controller {
-  index(req: Request, res: Response): void;
+export interface DbController {
   config(app: Express): Express;
 }
