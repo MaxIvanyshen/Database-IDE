@@ -15,6 +15,10 @@ export class MongoDAO {
         this.setSchema(schema);
     }
 
+    public static withSchemaFromFile(): MongoDAO {
+        return new MongoDAO(mongo_data.schema);
+    }
+
     public setSchema(schema: object | undefined): void {
         const userSchema = new Schema<UserObject>(schema);
         this.UserCollection = model<UserObject>(mongo_data.DB_COLLECTION, userSchema, mongo_data.DB_COLLECTION);  
@@ -60,19 +64,4 @@ export class MongoWriteResponse {
         this._id = id;
         this.status = status;
     }
-}
-
-// const test = async() => {
-//     const schema = {
-//             name: {type: String, required: true},
-//             occupation: {type: String, required: true}
-//     }
-//     const dao: MongoDAO = new MongoDAO(schema);
-//     console.log(await dao.connectToDB());
-//     // console.log(await dao.write({name: "Max Ivanyshen", occupation: "Student"}));
-//     console.log(await dao.findOne({occupation: "Student"}));
-//     console.log(await dao.disconnect());
-//     console.log(await dao.findOne({occupation: "Student"}));
-// }
-
-// test();
+} 
