@@ -19,15 +19,15 @@ export class PostgresController {
         fs.writeFileSync(`src/db_data/postgres_data.json`, JSON.stringify(data));
     }
 
-    private async write(req: Request, res: Response) {
+    private async write(req: Request, res: Response): Promise<void> {
         if(this.dao == null)
             this.dao = new PostgresDAO(postgres_data);
         
         const resp = await this.dao.write(req.body);
-        res.sendStatus(resp ? 401 : 200);
+        res.sendStatus(resp ? 400 : 200);
     }
 
-    private async findOne(req: Request, res: Response): Promise<any> {
+    private async findOne(req: Request, res: Response): Promise<void> {
         if(this.dao == null)
             this.dao = new PostgresDAO(postgres_data);
         
@@ -35,7 +35,7 @@ export class PostgresController {
         res.send(foundData);
     }
 
-    private async findMany(req: Request, res: Response): Promise<any> {
+    private async findMany(req: Request, res: Response): Promise<void> {
         if(this.dao == null)
             this.dao = new PostgresDAO(postgres_data);
         
@@ -43,12 +43,12 @@ export class PostgresController {
         res.send(foundData);
     }
 
-    private async delete(req: Request, res: Response): Promise<any> {
+    private async delete(req: Request, res: Response): Promise<void> {
         if(this.dao == null)
             this.dao = new PostgresDAO(postgres_data);
 
         const result = await this.dao.delete(req.body);
-        res.sendStatus(result ? 401 : 200);
+        res.sendStatus(result ? 400 : 200);
     }
 
     private setRoutes(app: Express): void {

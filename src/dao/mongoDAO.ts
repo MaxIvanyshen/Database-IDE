@@ -1,3 +1,4 @@
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 import * as mongo_data from '../db_data/mongo_data.json';
 import mongoose, { Schema, model, connect, Model, connection } from 'mongoose';
 
@@ -53,6 +54,12 @@ export class MongoDAO {
     public async findMany(query: any): Promise<any> {
         const users = await this.UserCollection.find().where(query).exec();
         return users;
+    }
+
+    public async delete(query: any): Promise<any> {
+        let status = 0; 
+        await this.UserCollection.findOneAndRemove(query).exec().catch((err: any) => {status = 1; console.log(err)});
+        return status;
     }
 }
 

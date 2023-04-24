@@ -2,6 +2,7 @@ import {Express, Request, Response} from 'express';
 import { MongoDAO } from '../dao/mongoDAO';
 import * as mongo_data from '../db_data/mongo_data.json';
 import * as fs from 'fs';
+import { textChangeRangeIsUnchanged } from 'typescript';
 
 export class MongoController {
 
@@ -33,23 +34,34 @@ export class MongoController {
     }
 
     private async write(req: Request, res: Response): Promise<void> {
-        if(this.dao == null) this.dao = MongoDAO.withSchemaFromFile(); 
+        if(this.dao == null) 
+            this.dao = MongoDAO.withSchemaFromFile(); 
         const resp = await this.dao.write(req.body);
         res.send(resp);
     }
 
     private async findOne(req:  Request, res: Response): Promise<void> {
-        if(this.dao == null) this.dao = MongoDAO.withSchemaFromFile(); 
+        if(this.dao == null) 
+            this.dao = MongoDAO.withSchemaFromFile(); 
         const query = req.body;
         const found = await this.dao.findOne(query);
         res.send(found);
     }
 
     private async findMany(req: Request, res: Response): Promise<void> {
-        if(this.dao == null) this.dao = MongoDAO.withSchemaFromFile(); 
+        if(this.dao == null)
+            this.dao = MongoDAO.withSchemaFromFile(); 
         const query = req.body;
         const found = await this.dao.findMany(query);
         res.send(found);
+    }
+
+    private async delete(req: Request, res: Response): Promise<void> {
+        if(this.dao == null)
+            this.dao = MongoDAO.withSchemaFromFile();
+
+        const result = await this.dao.delete(req.body);
+        res.sendStatus(result ? 400 : 200);
     }
 
     private setRoutes(app: Express): void {
@@ -72,6 +84,10 @@ export class MongoController {
         app.get('/mongo/find_many', (req: Request, res: Response) => {
             this.findMany(req, res);
         })
+    
+        app.delete("/mongo/delete", (req: Request, res: Response) => {
+            this.delete(req, res);
+        });
     }
 
     public config(app: Express): Express {
