@@ -1,10 +1,1 @@
-{
-    "connection_data": {
-        "user": "postgres",
-        "host": "localhost",
-        "database": "test_db",
-        "password": "",
-        "port": 5432
-    },
-    "table": "data"
-}
+{"connection_data":{"user":"postgres","host":"localhost","database":"test_db","password":"","port":5432},"table":"data"}
