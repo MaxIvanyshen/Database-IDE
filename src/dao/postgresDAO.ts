@@ -21,7 +21,7 @@ export class PostgresDAO {
     this.client.connect((err: any) => {
       if (err) {
         throw err;
-        status = 1;
+        status = this.ERROR;
       };
     });
     return status;
@@ -31,8 +31,8 @@ export class PostgresDAO {
     if(this.schema == null)
       await this.parseSchema();
 
-    let status = 0;
-    await this.client.query(this.makeInsertionQueryStr(data)).catch((err: any) => {status = 1; console.log(err)})
+    let status = this.OK;
+    await this.client.query(this.makeInsertionQueryStr(data)).catch((err: any) => {status = this.ERROR; console.log(err)})
 
     return status; 
   }
@@ -89,8 +89,28 @@ export class PostgresDAO {
       else 
         queryStr += ';';
     }
+    return queryStr; 
+  }
+
+  private makeUpdateQueryStr(query: any, data: any): string {
+    let queryStr = `UPDATE ${this.postgres_data.table} SET `;
+    const dataKeys = Object.keys(data);
+    for (let i = 0; i < dataKeys.length; i++) {
+      queryStr += `${dataKeys[i]} = '${data[dataKeys[i]]}'`;
+      if(i < dataKeys.length - 1)
+        queryStr += ', ';
+      else 
+        queryStr += ' WHERE ';
+    }
+    const queryKeys = Object.keys(query);
+    for (let i = 0; i < queryKeys.length; i++) {
+      queryStr += `${queryKeys[i]} = '${query[queryKeys[i]]}'`;
+      if(i < queryKeys.length - 1)
+        queryStr += ' AND ';
+      else 
+        queryStr += ';';
+    }
     return queryStr;
- 
   }
 
   public async findMany(query: any): Promise<any> {
@@ -105,8 +125,18 @@ export class PostgresDAO {
     if(this.schema == null)
       await this.parseSchema();
 
-    let status = 0;
-    await this.client.query(this.makeDeletionQueryStr(query)).catch((err: any) => {status = 1; console.log(err)});
+    let status = this.OK;
+    await this.client.query(this.makeDeletionQueryStr(query)).catch((err: any) => {status = this.ERROR; console.log(err)});
+
+    return status;
+  }
+
+  public async update(query: any, data: any): Promise<number> {
+    if(this.schema == null)
+      await this.parseSchema();
+   
+    let status = this.OK;
+    await this.client.query(this.makeUpdateQueryStr(query, data)).catch((err: any) => {status = this.ERROR; console.log(err)});
 
     return status;
   }
@@ -125,7 +155,7 @@ export class PostgresDAO {
 const test = async () => {
   const dao = new PostgresDAO(postgres_data);
   console.log(await dao.connectToDB());
-  console.log(await dao.delete({name: "Max", age: 16}));
+  console.log(await dao.update( {name: "Yarik", age: 17}, {name: "Max", age: 16}));
 }
 
 test();

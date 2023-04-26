@@ -64,6 +64,14 @@ export class MongoController {
         res.sendStatus(result ? 400 : 200);
     }
 
+    private async update(req: Request, res: Response): Promise<void> {
+        if(this.dao == null)
+            this.dao = MongoDAO.withSchemaFromFile();
+        
+        const result = await this.dao.update(req.body.query, req.body.data);
+        res.sendStatus(result ? 400 : 200);
+    }
+
     private setRoutes(app: Express): void {
         app.post("/mongo/add_data", (req: Request, res: Response) => {
             this.addData(req, res);
@@ -87,6 +95,10 @@ export class MongoController {
     
         app.delete("/mongo/delete", (req: Request, res: Response) => {
             this.delete(req, res);
+        });
+
+        app.put("/mongo/update", (req: Request, res: Response) => {
+            this.update(req, res);
         });
     }
 

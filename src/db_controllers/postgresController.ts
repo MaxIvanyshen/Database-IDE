@@ -51,6 +51,14 @@ export class PostgresController {
         res.sendStatus(result ? 400 : 200);
     }
 
+    private async update(req: Request, res: Response): Promise<void> {
+        if(this.dao == null)
+            this.dao = new PostgresDAO(postgres_data);
+        
+        const result = await this.dao.update(req.body.query, req.body.data);
+        res.sendStatus(result ? 400 : 200);
+    }
+
     private setRoutes(app: Express): void {
         app.post("/postgres/add_data", (req: Request, res: Response) => {
             this.addData(req, res);
@@ -70,6 +78,10 @@ export class PostgresController {
 
         app.delete("/postgres/delete", (req: Request, res: Response) => {
             this.delete(req, res);
+        });
+
+        app.put("/postgres/update", (req: Request, res: Response) => {
+            this.update(req, res);
         });
     }
 

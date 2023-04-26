@@ -1,6 +1,7 @@
 import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 import * as mongo_data from '../db_data/mongo_data.json';
 import mongoose, { Schema, model, connect, Model, connection } from 'mongoose';
+import { setMaxIdleHTTPParsers } from 'http';
 
 interface UserObject {
 };
@@ -56,9 +57,15 @@ export class MongoDAO {
         return users;
     }
 
-    public async delete(query: any): Promise<any> {
-        let status = 0; 
-        await this.UserCollection.findOneAndRemove(query).exec().catch((err: any) => {status = 1; console.log(err)});
+    public async delete(query: any): Promise<number> {
+        let status = this.OK; 
+        await this.UserCollection.findOneAndRemove(query).exec().catch((err: any) => {status = this.ERROR; console.log(err)});
+        return status;
+    }
+
+    public async update(query: any, data: any): Promise<number> {
+        let status = this.OK;
+        await this.UserCollection.findOneAndUpdate(query, data).exec().catch((err: any) => {status = this.ERROR; console.log(err)});
         return status;
     }
 }
