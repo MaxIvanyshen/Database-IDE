@@ -5,18 +5,18 @@ export class PostgresDAO {
   public readonly OK = 0;
   public readonly ERROR = 1;
 
-  private postgres_data: any = null;
+  private data: any = null;
   private client: any = null;
 
   private schema: any = null;
 
   constructor(data?: object) {
-    if(data != undefined) this.postgres_data = data;
+    if(data != undefined) this.data = data;
     this.connectToDB();
   }
 
   public async connectToDB(): Promise<number> {
-    this.client = new Client(postgres_data.connection_data);
+    this.client = new Client(this.data.connection_data);
     let status: number = 0;
     this.client.connect((err: any) => {
       if (err) {
@@ -47,7 +47,7 @@ export class PostgresDAO {
   }
 
   private makeInsertionQueryStr(query: any): string {
-    let queryStr = `INSERT INTO ${this.postgres_data.table}(`;
+    let queryStr = `INSERT INTO ${this.data.table}(`;
     const keys = Object.keys(query);
     for(let i = 0; i < keys.length; i++) {
       queryStr += keys[i];
@@ -67,7 +67,7 @@ export class PostgresDAO {
   }
 
   private makeSelectionQueryStr(query: any): string  {
-    let queryStr = `SELECT * FROM ${this.postgres_data.table} WHERE `;
+    let queryStr = `SELECT * FROM ${this.data.table} WHERE `;
     const keys = Object.keys(query);
     for (let i = 0; i < keys.length; i++) {
       queryStr += `${keys[i]} = '${query[keys[i]]}'`;
@@ -80,7 +80,7 @@ export class PostgresDAO {
   }
 
   private makeDeletionQueryStr(query: any): string {
-    let queryStr = `DELETE FROM ${this.postgres_data.table} WHERE `;
+    let queryStr = `DELETE FROM ${this.data.table} WHERE `;
     const keys = Object.keys(query);
     for (let i = 0; i < keys.length; i++) {
       queryStr += `${keys[i]} = '${query[keys[i]]}'`;
@@ -93,7 +93,7 @@ export class PostgresDAO {
   }
 
   private makeUpdateQueryStr(query: any, data: any): string {
-    let queryStr = `UPDATE ${this.postgres_data.table} SET `;
+    let queryStr = `UPDATE ${this.data.table} SET `;
     const dataKeys = Object.keys(data);
     for (let i = 0; i < dataKeys.length; i++) {
       queryStr += `${dataKeys[i]} = '${data[dataKeys[i]]}'`;
@@ -145,7 +145,7 @@ export class PostgresDAO {
     const result = await this.client.query(`
       SELECT column_name, data_type 
       FROM information_schema.columns 
-      WHERE table_name = '${this.postgres_data.table}'
+      WHERE table_name = '${this.data.table}'
     `);
 
     this.schema = result.rows;
