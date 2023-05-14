@@ -1,9 +1,1 @@
-{
-    "connection_data": {
-    "host": "localhost",
-    "user": "max",
-    "password": "sqlmax",
-    "database": "test_db"
-    },
-    "table": "data"
-}
+{"connection_data":{"host":"localhost","user":"max","password":"sqlmax","database":"test_db"},"table":"data"}
