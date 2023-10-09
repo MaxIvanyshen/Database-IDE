@@ -1,6 +1,7 @@
 import * as postgres_data from '../db_data/postgres_data.json';
 import { Client } from 'pg';
 import { SqlQueryConstructor } from './sqlQueryConstructor';
+import { SchemaConverter } from './schemaConverter';
 
 export class PostgresDAO {
   public readonly OK = 0;
@@ -30,7 +31,7 @@ export class PostgresDAO {
 
   public async write(data: Object): Promise<number> {
     if(this.schema == null)
-      await this.parseSchema();
+      await this.getSchema();
 
     let status = this.OK;
     await this.client.query(SqlQueryConstructor.makeInsertionQueryStr(data, this.data.table)).catch((err: any) => {status = this.ERROR; console.log(err)})
@@ -41,7 +42,7 @@ export class PostgresDAO {
   public async findOne(query: any): Promise<any> {
 
     if(this.schema == null) 
-     await this.parseSchema();
+      await this.getSchema();
     
     const result = await this.client.query(SqlQueryConstructor.makeSelectionQueryStr(query, this.data.table));
     return result.rows[0];
@@ -49,7 +50,7 @@ export class PostgresDAO {
 
   public async findMany(query: any): Promise<any> {
     if(this.schema == null) 
-      await this.parseSchema();
+      await this.getSchema();
     let queryStr = SqlQueryConstructor.makeSelectionQueryStr(query, this.data.table);
     const result = await this.client.query(queryStr);
     return result.rows;
@@ -57,7 +58,7 @@ export class PostgresDAO {
 
   public async delete(query: any): Promise<number> {
     if(this.schema == null)
-      await this.parseSchema();
+      await this.getSchema();
 
     let status = this.OK;
     await this.client.query(SqlQueryConstructor.makeDeletionQueryStr(query, this.data.table)).catch((err: any) => {status = this.ERROR; console.log(err)});
@@ -67,7 +68,7 @@ export class PostgresDAO {
 
   public async update(query: any, data: any): Promise<number> {
     if(this.schema == null)
-      await this.parseSchema();
+      await this.getSchema();
    
     let status = this.OK;
     await this.client.query(SqlQueryConstructor.makeUpdateQueryStr(query, data, this.data.table)).catch((err: any) => {status = this.ERROR; console.log(err)});
@@ -75,7 +76,7 @@ export class PostgresDAO {
     return status;
   }
 
-  private async parseSchema(): Promise<void> {
+  private async getSchema(): Promise<void> {
     const result = await this.client.query(`
       SELECT column_name, data_type 
       FROM information_schema.columns 
@@ -83,13 +84,6 @@ export class PostgresDAO {
     `);
 
     this.schema = result.rows;
+    return SchemaConverter.convert(this.schema);
   }
 }
-
-const test = async () => {
-  const dao = new PostgresDAO(postgres_data);
-  console.log(await dao.connectToDB());
-  console.log(await dao.update( {name: "Yarik", age: 17}, {name: "Max", age: 16}));
-}
-
-test();

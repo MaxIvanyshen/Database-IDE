@@ -2,6 +2,7 @@ import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 import * as mongo_data from '../db_data/mongo_data.json';
 import mongoose, { Schema, model, connect, Model, connection } from 'mongoose';
 import { setMaxIdleHTTPParsers } from 'http';
+import { UnorderedBulkOperation } from 'mongodb';
 
 interface UserObject {
 };
@@ -26,8 +27,8 @@ export class MongoDAO {
         this.UserCollection = model<UserObject>(mongo_data.DB_COLLECTION, userSchema, mongo_data.DB_COLLECTION);  
     }
 
-    public getSchema(): Schema<UserObject> {
-        return this.UserCollection.schema;
+    public getSchema(): any {
+        return this.UserCollection.schema.obj;
     }
 
     public async connectToDB(): Promise<number> {

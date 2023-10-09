@@ -4,6 +4,7 @@ import {Express, Response, Request} from 'express';
 import { MySqlDAO } from '../dao/mysqlDAO';
 import * as fs from 'fs';
 import { SqlQueryConstructor } from '../dao/sqlQueryConstructor';
+import { SchemaConverter } from '../dao/schemaConverter';
 
 export class MySqlController {
 
@@ -57,33 +58,44 @@ export class MySqlController {
     private writeDataToFile(data: object): void {
         fs.writeFileSync(`src/db_data/mysql_data.json`, JSON.stringify(data));
     }
+    
+    private async getSchema(req: Request, res: Response) {
+        await this.dbCon.query(`
+            SELECT column_name, data_type 
+            FROM information_schema.columns 
+            WHERE table_name = '${mysql_data.table}'
+        `, (err: any, rows: any) => {res.send(SchemaConverter.convert(rows))});
+    }
 
     private setRoutes(app: Express): void {
 
-        app.post("/mysql/set_data/", (req: Request, res: Response) => {
+        app.post("/mysql/set_data", (req: Request, res: Response) => {
             this.addData(req, res);
         });
 
-        app.get("/mysql/find_one/", (req: Request,res: Response) => {
+        app.get("/mysql/find_one", (req: Request,res: Response) => {
             this.findOne(req, res);
         });
 
-        app.get("/mysql/find_many/", (req: Request, res: Response) => {
+        app.post("/mysql/find_many", (req: Request, res: Response) => {
             this.findMany(req, res);
         });
         
-        app.post("/mysql/write/", (req: Request, res: Response) => {
+        app.post("/mysql/write", (req: Request, res: Response) => {
             this.write(req, res);
         });
 
-        app.put("/mysql/update/", (req: Request, res: Response) => {
+        app.put("/mysql/update", (req: Request, res: Response) => {
             this.update(req, res);
         });
 
-        app.delete("/mysql/delete/", (req: Request, res: Response) => {
+        app.delete("/mysql/delete", (req: Request, res: Response) => {
             this.delete(req, res);
         });
 
+        app.get("/mysql/schema", (req: Request, res: Response) => {
+            this.getSchema(req, res);
+        });
     }
 
     public config(app: Express): Express {

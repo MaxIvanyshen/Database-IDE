@@ -8,6 +8,10 @@ import { textChangeRangeIsUnchanged } from 'typescript';
 
 export class PostgresController {
     private dao: any = null;
+    
+    constructor() {
+        this.dao = new PostgresDAO(postgres_data);
+    }
 
     private addData(req: Request, res: Response): void {
         const data = req.body;
@@ -20,59 +24,53 @@ export class PostgresController {
     }
 
     private async write(req: Request, res: Response): Promise<void> {
-        if(this.dao == null)
-            this.dao = new PostgresDAO(postgres_data);
-        
         const resp = await this.dao.write(req.body);
         res.sendStatus(resp ? 400 : 200);
     }
 
     private async findOne(req: Request, res: Response): Promise<void> {
-        if(this.dao == null)
-            this.dao = new PostgresDAO(postgres_data);
-        
         const foundData = await this.dao.findOne(req.body);
         res.send(foundData);
     }
 
     private async findMany(req: Request, res: Response): Promise<void> {
-        if(this.dao == null)
-            this.dao = new PostgresDAO(postgres_data);
-        
         const foundData = await this.dao.findMany(req.body);
         res.send(foundData);
     }
 
     private async delete(req: Request, res: Response): Promise<void> {
-        if(this.dao == null)
-            this.dao = new PostgresDAO(postgres_data);
-
         const result = await this.dao.delete(req.body);
         res.sendStatus(result ? 400 : 200);
     }
 
     private async update(req: Request, res: Response): Promise<void> {
-        if(this.dao == null)
-            this.dao = new PostgresDAO(postgres_data);
-        
         const result = await this.dao.update(req.body.query, req.body.data);
         res.sendStatus(result ? 400 : 200);
+    }
+    
+    private async getSchema(req: Request, res: Response): Promise<void> {
+        res.send(await this.dao.getSchema());
     }
 
     private setRoutes(app: Express): void {
         app.post("/postgres/add_data", (req: Request, res: Response) => {
             this.addData(req, res);
         });
+        
+
+        app.get("/postgres/schema", (req: Request, res: Response) => {
+            this.getSchema(req, res);
+        });
 
         app.post("/postgres/write", (req: Request, res: Response) => {
             this.write(req, res);
         });
 
-        app.get("/postgres/find_one", (req: Request, res: Response) => {
+        app.post("/postgres/find_one", (req: Request, res: Response) => {
             this.findOne(req, res);
         });
         
-        app.get("/postgres/find_many", (req: Request, res: Response) => {
+        app.post("/postgres/find_many", (req: Request, res: Response) => {
             this.findMany(req, res);
         });
 

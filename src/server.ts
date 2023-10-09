@@ -3,6 +3,7 @@ import { DbController } from './db_controllers/controller';
 import { MongoController } from './db_controllers/mongoController';
 import { PostgresController } from './db_controllers/postgresController';
 import { MySqlController } from './db_controllers/mysqlController';
+import cors from "cors";
 
 export class Server {
     private app: Express;
@@ -23,6 +24,7 @@ export class Server {
     private config(): void {
         this.app.use(express.json());
         this.mongoController.config(this.app);
+        this.app.use(cors({origin: ["http://localhost:5173",  'http://127.0.0.1:5173']}));
         this.postgresController.config(this.app);
         this.mysqlContoller.config(this.app);
     }
