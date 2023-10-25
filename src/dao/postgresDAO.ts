@@ -29,11 +29,15 @@ export class PostgresDAO {
     return status;
   }
 
-  public async write(data: Object): Promise<number> {
+  public async write(data: any): Promise<number> {
     if(this.schema == null)
       await this.getSchema();
-
+    
     let status = this.OK;
+    let rowsNumberQuery = `SELECT COUNT(*) AS "count" FROM ` + postgres_data.table + ``;
+    let rowsNumberResp = await this.client.query(rowsNumberQuery);
+    let rowsNumber = rowsNumberResp.rows[0].count;
+    data["id"] = Number(rowsNumber) + 1;
     await this.client.query(SqlQueryConstructor.makeInsertionQueryStr(data, this.data.table)).catch((err: any) => {status = this.ERROR; console.log(err)})
 
     return status; 
@@ -41,7 +45,6 @@ export class PostgresDAO {
 
   public async findOne(query: any): Promise<any> {
 
-    if(this.schema == null) 
       await this.getSchema();
     
     const result = await this.client.query(SqlQueryConstructor.makeSelectionQueryStr(query, this.data.table));

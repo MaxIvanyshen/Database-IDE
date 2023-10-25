@@ -22,6 +22,6 @@ export class SchemaConverter {
                 schema[i].data_type = "String";
             }
         }
+        ;
     }
-
 }
